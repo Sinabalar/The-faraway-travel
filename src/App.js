@@ -1,28 +1,44 @@
 import { useState } from "react";
 
-const initialItems = [
-  { id: 1, description: "Passports", quantity: 2, packed: false },
-  { id: 3, description: "Socks", quantity: 12, packed: true },
-  { id: 2, description: "Charger", quantity: 1, packed: false },
-];
-
 
 export default function App() {
+  const [items, setItems] = useState([]);
+
+  function handelAddItems(newItem) {
+    setItems(items => [...items, newItem]);
+
+  };
+
+  function handelDeleteItems(id) {
+    setItems(items => items.filter(item => item.id !== id));
+  };
+
+  function handelPackedItems(id) {
+    setItems(items => items.map(item => item.id === id
+      ? { ...item, packed: !item.packed } : item))
+  };
+
   return (
     <div className="app">
       <Logo />
-      <Form />
-      <PackingList />
-      <Stats />
+      <Form handelAddItems={handelAddItems} />
+      <PackingList
+        items={items}
+        handelDeleteItems={handelDeleteItems}
+        handelPackedItems={handelPackedItems}
+      />
+      <Stats items={items} />
     </div>
   );
-}
+};
+
+
 function Logo() {
   return (
     <h1>🏝 Far Away 🛄</h1>
   );
 }
-function Form() {
+function Form({ handelAddItems }) {
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState(1);
 
@@ -37,11 +53,13 @@ function Form() {
       quantity,
       packed: false
     }
-    console.log(newItem);
+
+    handelAddItems(newItem);
 
     setDescription("");
     setQuantity(1);
   };
+
   return (
     <form className="add-form" onSubmit={HandelForm}>
       <h3>What do you need for you'r 😍 trip ?</h3>
@@ -52,34 +70,75 @@ function Form() {
       <button> add</button>
     </form>
   );
-}
-function PackingList() {
+};
+
+
+function PackingList({
+  items,
+  handelDeleteItems,
+  handelPackedItems }) {
   return (
     <div className="list">
       <ul>
         {
-          initialItems.map(el => <Item item={el} key={el.id} />)
+          items.map(el => <Item
+            item={el}
+            handelDeleteItems={handelDeleteItems}
+            handelPackedItems={handelPackedItems}
+            key={el.id}
+          />)
         }
       </ul>
     </div>
   );
 };
-function Stats() {
-  return (
-    <footer className="stats">
-      <em>
-        💼 You have X items on your list and you already packed X (X%)
-      </em>
-    </footer>
-  );
-}
-function Item({ item }) {
+
+
+function Item({
+  item,
+  handelDeleteItems,
+  handelPackedItems
+}) {
   return (
     <li>
-      <span style={item.packed ? { textDecoration: 'line-through' } : {}}>
+      <input
+        type="checkbox"
+        value={item.packed}
+        onChange={() => handelPackedItems(item.id)}
+      >
+
+      </input>
+      <span
+        style={item.packed ? { textDecoration: 'line-through' } : {}}
+      >
         {item.quantity} {item.description}
       </span>
-      <button>❌</button>
+      <button onClick={() => handelDeleteItems(item.id)}>❌</button>
     </li >
   );
 }
+
+
+function Stats({ items }) {
+  if (items.length === 0) return (
+    <footer className="stats">
+      <em>
+        Start adding some items in your list
+      </em>
+    </footer>
+  );
+  const numOfItems = items.length;
+  const numOfPackedItems = items.filter(item => item.packed).length
+  const percentageOfPackedItems = Math.round((numOfPackedItems / numOfItems) * 100);
+  return (
+    <footer className="stats">
+      <em>
+        {
+          percentageOfPackedItems === 100
+            ? 'You got everything and ready to Go... ✈'
+            : `💼 You have ${numOfItems} items on your list and you already packed ${numOfPackedItems} (${percentageOfPackedItems}%)`
+        }
+      </em>
+    </footer>
+  );
+};
