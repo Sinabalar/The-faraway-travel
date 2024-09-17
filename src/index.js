@@ -1,7 +1,6 @@
 import React from "react";
 import ReactDOM from 'react-dom/client';
-import App from './App';
-import ConfirmDialog from './ConfirmDialog';
+import App from './components/App';
 import './index.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
