@@ -18,6 +18,10 @@ export default function App() {
       ? { ...el, packed: !el.packed }
       : el))
   };
+  function handelClearList() {
+    const confrimed = window.confirm("Are you sure you want to clear your list?")
+    if (confrimed) setItems([]); else { }
+  }
 
   return (
     <div className="app">
@@ -27,6 +31,7 @@ export default function App() {
         items={items}
         handelDeleteItems={handelDeleteItems}
         handelPackedItems={handelPackedItems}
+        handelClearList={handelClearList}
       />
       <Stats items={items} />
     </div>
@@ -98,7 +103,8 @@ function Form({ handelAddItems }) {
 function PackingList({
   items,
   handelDeleteItems,
-  handelPackedItems }) {
+  handelPackedItems,
+  handelClearList }) {
 
   const [sortBy, setSortBy] = useState('input');
   let sortedItems;
@@ -132,19 +138,24 @@ function PackingList({
             />)
         }
       </ul>
-      <div className="actions">
-        <select
-          value={sortBy}
-          onChange={event => setSortBy(event.target.value)}
-        >
+      {
+        items.length >= 1
+          ? (<div className="actions">
+            <select
+              value={sortBy}
+              onChange={event => setSortBy(event.target.value)}
+            >
 
 
-          <option value={'input'}>Sort by input order</option>
-          <option value={'description'}>Sort by description</option>
-          <option value={'packed'}>Sort by packed status</option>
-        </select>
-        <button>clear list</button>
-      </div>
+              <option value={'input'}>Sort by input order</option>
+              <option value={'description'}>Sort by description</option>
+              <option value={'packed'}>Sort by packed status</option>
+            </select>
+            <button onClick={handelClearList}>clear list</button>
+          </div>) : null
+
+
+      }
     </div>
   );
 };
