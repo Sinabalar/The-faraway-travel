@@ -1,8 +1,10 @@
 import { useState } from "react";
+import ConfirmDialog from "./ConfirmDialog";
 
 
 export default function App() {
   const [items, setItems] = useState([]);
+  const [showConfrim, setShowConfrim] = useState(false);
 
   function handelAddItems(newItem) {
     setItems(items => [...items, newItem]);
@@ -18,10 +20,17 @@ export default function App() {
       ? { ...el, packed: !el.packed }
       : el))
   };
+
   function handelClearList() {
-    const confrimed = window.confirm("Are you sure you want to clear your list?")
-    if (confrimed) setItems([]); else { }
-  }
+    setShowConfrim(true);
+  };
+  function handelConfrimedClear() {
+    setItems([]);
+    setShowConfrim(false);
+  };
+  function handelCanseldClear() {
+    setShowConfrim(false);
+  };
 
   return (
     <div className="app">
@@ -34,6 +43,13 @@ export default function App() {
         handelClearList={handelClearList}
       />
       <Stats items={items} />
+      {showConfrim && (
+        <ConfirmDialog
+          message={`you are clearing the ${items.length} item${items.length > 1 ? 's' : ''}. Are you sure ?`}
+          onConfrim={handelConfrimedClear}
+          onCansel={handelCanseldClear}
+        />
+      )}
     </div>
   );
 };
