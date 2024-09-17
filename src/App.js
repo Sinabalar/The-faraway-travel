@@ -10,12 +10,13 @@ export default function App() {
   };
 
   function handelDeleteItems(id) {
-    setItems(items => items.filter(item => item.id !== id));
+    setItems(items => items.filter(el => el.id !== id));
   };
 
   function handelPackedItems(id) {
-    setItems(items => items.map(item => item.id === id
-      ? { ...item, packed: !item.packed } : item))
+    setItems(items => items.map(el => el.id === id
+      ? { ...el, packed: !el.packed }
+      : el))
   };
 
   return (
@@ -61,13 +62,34 @@ function Form({ handelAddItems }) {
   };
 
   return (
-    <form className="add-form" onSubmit={HandelForm}>
+    <form
+      className="add-form"
+      onSubmit={HandelForm}
+    >
       <h3>What do you need for you'r 😍 trip ?</h3>
-      <select value={quantity} onChange={event => setQuantity(Number(event.target.value))}>
-        {Array.from({ length: 20 }, (_, i) => i + 1).map(num => <option value={num} key={num}>{num}</option>)}
+      <select
+        value={quantity}
+        onChange={
+          event => setQuantity(Number(event.target.value))
+        }
+      >
+        {
+          Array.from({ length: 20 }, (_, i) => i + 1).map(el =>
+            <option
+              value={el}
+              key={el}
+            >
+              {el}
+            </option>)
+        }
       </select>
-      <input type="text" placeholder="Item..." value={description} onChange={event => setDescription(event.target.value)} />
-      <button> add</button>
+      <input
+        type="text"
+        placeholder="Item..."
+        value={description}
+        onChange={event => setDescription(event.target.value)}
+      />
+      <button>add</button>
     </form>
   );
 };
@@ -77,18 +99,52 @@ function PackingList({
   items,
   handelDeleteItems,
   handelPackedItems }) {
+
+  const [sortBy, setSortBy] = useState('input');
+  let sortedItems;
+
+
+  switch (sortBy) {
+    case ('input'):
+      sortedItems = items;
+      break;
+    case ('description'):
+      sortedItems = items.slice().sort((a, b) => a.description.localeCompare(b.description));
+      break;
+    case ('packed'):
+      sortedItems = items.slice().sort((a, b) => Number(a.packed) - Number(b.packed));
+      break;
+    default:
+      sortedItems = items;
+  };
+
+
   return (
     <div className="list">
       <ul>
         {
-          items.map(el => <Item
-            item={el}
-            handelDeleteItems={handelDeleteItems}
-            handelPackedItems={handelPackedItems}
-            key={el.id}
-          />)
+          sortedItems.map(el =>
+            <Item
+              item={el}
+              handelDeleteItems={handelDeleteItems}
+              handelPackedItems={handelPackedItems}
+              key={el.id}
+            />)
         }
       </ul>
+      <div className="actions">
+        <select
+          value={sortBy}
+          onChange={event => setSortBy(event.target.value)}
+        >
+
+
+          <option value={'input'}>Sort by input order</option>
+          <option value={'description'}>Sort by description</option>
+          <option value={'packed'}>Sort by packed status</option>
+        </select>
+        <button>clear list</button>
+      </div>
     </div>
   );
 };
@@ -106,29 +162,39 @@ function Item({
         value={item.packed}
         onChange={() => handelPackedItems(item.id)}
       >
-
       </input>
+
       <span
-        style={item.packed ? { textDecoration: 'line-through' } : {}}
+        style={
+          item.packed
+            ? { textDecoration: 'line-through' }
+            : {}
+        }
       >
         {item.quantity} {item.description}
       </span>
-      <button onClick={() => handelDeleteItems(item.id)}>❌</button>
+      <button
+        onClick={() => handelDeleteItems(item.id)}
+      >
+        ❌
+      </button>
     </li >
   );
 }
 
 
 function Stats({ items }) {
-  if (items.length === 0) return (
-    <footer className="stats">
-      <em>
-        Start adding some items in your list
-      </em>
-    </footer>
-  );
+  if (items.length === 0) {
+    return (
+      <footer className="stats">
+        <em>
+          Start adding some items in your list
+        </em>
+      </footer>
+    );
+  }
   const numOfItems = items.length;
-  const numOfPackedItems = items.filter(item => item.packed).length
+  const numOfPackedItems = items.filter(el => el.packed).length;
   const percentageOfPackedItems = Math.round((numOfPackedItems / numOfItems) * 100);
   return (
     <footer className="stats">
